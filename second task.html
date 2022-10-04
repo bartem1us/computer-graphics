@@ -27,8 +27,8 @@
                     const arrB = [];
                     const arrS = [];
 
-                    for (var k = -pixels_column_count; k < pixels_column_count; k++) {
-                        for (var l = -pixels_row_count; l < pixels_row_count; l++) {
+                    for (var k = -pixels_column_count; k <= pixels_column_count; k++) {
+                        for (var l = -pixels_row_count; l <= pixels_row_count; l++) {
                             arrR.push(idata.data[((i + l) * w + j + k) * 4]);
                             arrG.push(idata.data[((i + l) * w + j + k) * 4 + 1]);
                             arrB.push(idata.data[((i + l) * w + j + k) * 4 + 2]);
