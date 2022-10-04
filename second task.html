@@ -27,8 +27,8 @@
                     const arrB = [];
                     const arrS = [];
 
-                    for (var k = 0; k < pixels_column_count; k++) {
-                        for (var l = 0; l < pixels_row_count; l++) {
+                    for (var k = -pixels_column_count; k < pixels_column_count; k++) {
+                        for (var l = -pixels_row_count; l < pixels_row_count; l++) {
                             arrR.push(idata.data[((i + l) * w + j + k) * 4]);
                             arrG.push(idata.data[((i + l) * w + j + k) * 4 + 1]);
                             arrB.push(idata.data[((i + l) * w + j + k) * 4 + 2]);
@@ -41,15 +41,10 @@
                     arrB.sort();
                     arrS.sort();
                     var mid = Math.floor(arrR.length / 2);
-
-                    for (var k = 0; k < pixels_column_count; k++) {
-                        for (var l = 0; l < pixels_row_count; l++) {
-                            idata1.data[((i + l) * w + j + k) * 4] = arrR[mid];
-                            idata1.data[((i + l) * w + j + k) * 4 + 1] = arrG[mid];
-                            idata1.data[((i + l) * w + j + k) * 4 + 2] = arrB[mid];
-                            idata1.data[((i + l) * w + j + k) * 4 + 3] = arrS[mid];
-                        }
-                    }
+                    idata1.data[(i * w + j) * 4] = arrR[mid];
+                    idata1.data[(i * w + j) * 4 + 1] = arrG[mid];
+                    idata1.data[(i * w + j) * 4 + 2] = arrB[mid];
+                    idata1.data[(i * w + j) * 4 + 3] = arrS[mid];
                 }
             }
             ctx.putImageData(idata1, 500, 0);
