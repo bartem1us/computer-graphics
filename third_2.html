@@ -1,0 +1,27 @@
+<HTML>
+
+<BODY>
+    <canvas id='lesson03' width='200' height='200' />
+    <script>
+        let canvas = document.getElementById("lesson03");
+        let ctx = canvas.getContext("2d");
+
+
+        var x1 = 147;
+        var y1 = 57;
+        var x0 = 10;
+        var y0 = 10;
+        var e = 0;
+        var y = y0;
+        for (var x = x0; x <= x1; x++) {
+            ctx.fillRect(x, y, 1, 1);
+            e = e + (y1 - y0) * 2;
+            if (e > (x1 - x0)) {
+                e = e - 2 * (x1 - x0);
+                y = y + 1;
+            }
+        }
+    </script>
+</BODY>
+
+</HTML>
