@@ -1,0 +1,272 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <link rel="stylesheet" href="./css/workspace_style.css">
+
+    <title>HomeWork05</title>
+
+</head>
+
+<body>
+    <h1>Homework 2. Filters.</h1>
+    <h3>Original picture.</h3>
+    <canvas width="1000" , height="1000" , id="original"></canvas>
+
+    <h3>Median filtered picture.</h3>
+    <canvas width="1000" , height="1000" , id="median"></canvas>
+
+    <h3>Average filtered picture.</h3>
+    <canvas width="1000" , height="1000" , id="average"></canvas>
+
+    <h3>Sobel filtered picture.</h3>
+    <canvas width="1000" , height="1000" , id="sobel"></canvas>
+
+    <h3>Gauss filtered picture.</h3>
+    <canvas width="1000" , height="1000" , id="gauss"></canvas>
+
+
+
+    <script>
+        // Пространство для 1го изображения.
+        var canvas = document.getElementById("original");
+        var ctx = canvas.getContext("2d");
+
+        // Пространство для 2го изображения (Медианный фильтр).
+        var canvas2 = document.getElementById("median");
+        var ctx2 = canvas2.getContext("2d");
+
+        // Пространство для 3го изображения (Усредненный фильтр).
+        var canvas3 = document.getElementById("average");
+        var ctx3 = canvas3.getContext("2d");
+
+        // Пространство для 4го изображения (Фильтр Собеля).
+        var canvas4 = document.getElementById("sobel");
+        var ctx4 = canvas4.getContext("2d");
+
+        // Пространство для 5го изображения (Фильтр Гаусса).
+        var canvas5 = document.getElementById("gauss");
+        var ctx5 = canvas5.getContext("2d");
+
+        // Скачиваем исходное изображение.
+        var img = new Image();
+
+
+        img.crossOrigin = "*";
+        img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/2014_Ziarno_na_fotografii_analogowej.jpg/1280px-2014_Ziarno_na_fotografii_analogowej.jpg";
+
+        const height = canvas.height;
+        const width = canvas.width;
+
+        img.onload = function() {
+
+            ctx.drawImage(img, 0, 0, width, height);
+
+            function gaussFilter() {
+                const size = 1;
+                //const weights_matrix = [[-1, -1, -1], [-1, 9, -1], [-1, -1, -1]];
+                const weights_matrix = [
+                    [-2, -2, -2],
+                    [-2, 9, -2],
+                    [-2, -2, -2]
+                ];
+                let weights_sum = 0;
+
+                for (let i = 0; i < weights_matrix.length; i++) {
+                    weights_sum = weights_matrix[i].reduce((a, b) => a + b, weights_sum);
+                }
+
+                let img_data = ctx.getImageData(0, 0, width, height)
+                let img5_data = ctx.createImageData(width, height)
+
+                for (let i = 0; i < width; i++) {
+                    for (let j = 0; j < height; j++) {
+                        let R = 0;
+                        let G = 0;
+                        let B = 0;
+                        let S = 0;
+
+                        for (let k = -size; k <= size; k++) {
+                            for (let l = -size; l <= size; l++) {
+                                R += img_data.data[((j + l) * width + i + k) * 4] * weights_matrix[l + size][k + size];
+                                G += img_data.data[((j + l) * width + i + k) * 4 + 1] * weights_matrix[l + size][k + size];
+                                B += img_data.data[((j + l) * width + i + k) * 4 + 2] * weights_matrix[l + size][k + size];
+                                S += img_data.data[((j + l) * width + i + k) * 4 + 3] * weights_matrix[l + size][k + size];
+                            }
+                        }
+
+                        img5_data.data[(j * width + i) * 4] = R / weights_sum;
+                        img5_data.data[(j * width + i) * 4 + 1] = G / weights_sum;
+                        img5_data.data[(j * width + i) * 4 + 2] = B / weights_sum;
+                        img5_data.data[(j * width + i) * 4 + 3] = S / weights_sum;
+                    }
+                }
+
+                ctx5.putImageData(img5_data, 0, 0, 0, 0, width, height);
+            }
+
+            function sobelFilter() {
+                function getGx(pixels, x, y) {
+                    let Gx = 0;
+
+                    for (let k = -size; k <= size; ++k) {
+                        for (let l = -size; l <= size; ++l) {
+                            Gx += pixels.data[((y + l) * width + x + k) * 4] * x_weights[l + size][k + size];
+                            Gx += pixels.data[((y + l) * width + x + k) * 4 + 1] * x_weights[l + size][k + size];
+                            Gx += pixels.data[((y + l) * width + x + k) * 4 + 2] * x_weights[l + size][k + size];
+                        }
+                    }
+
+                    return Gx
+                }
+
+                function getGy(pixels, x, y) {
+                    let Gy = 0;
+
+                    for (let k = -size; k <= size; ++k) {
+                        for (let l = -size; l <= size; ++l) {
+                            Gy += pixels.data[((y + l) * width + x + k) * 4] * y_weights[l + size][k + size];
+                            Gy += pixels.data[((y + l) * width + x + k) * 4 + 1] * y_weights[l + size][k + size];
+                            Gy += pixels.data[((y + l) * width + x + k) * 4 + 2] * y_weights[l + size][k + size];
+                        }
+                    }
+
+                    return Gy
+                }
+
+                let img_data = ctx.getImageData(0, 0, width, height);
+                let img4_data = ctx.createImageData(width, height);
+
+                const size = 1;
+
+                let x_weights = [
+                    [-1, 0, 1],
+                    [-2, 0, 2],
+                    [-1, 0, 1]
+                ];
+                let y_weights = [
+                    [-1, -2, -1],
+                    [0, 0, 0],
+                    [1, 2, 1]
+                ];
+
+                for (let i = 0; i < width; ++i) {
+                    for (let j = 0; j < height; ++j) {
+                        let G = Math.ceil(Math.sqrt(Math.pow(getGx(img_data, i, j), 2) + Math.pow(getGy(img_data, i, j), 2)));
+
+                        for (let x = 0; x < 3; ++x) {
+                            img4_data.data[(j * width + i) * 4 + x] = G;
+                        }
+
+                        img4_data.data[(j * width + i) * 4 + 3] = 255;
+                    }
+                }
+
+                ctx4.putImageData(img4_data, 0, 0, 0, 0, width, width);
+            }
+
+            function averageFilter() {
+                let img_data = ctx.getImageData(0, 0, width, width);
+
+                let img3_data = ctx.createImageData(width, height);
+
+                let row_size = 1;
+                let col_size = 1;
+
+                for (let i = 0; i < height; i++) {
+                    for (let j = 0; j < width; j++) {
+                        const R = [];
+                        const G = [];
+                        const B = [];
+                        const S = [];
+
+                        for (var k = -col_size; k <= col_size; k++) {
+                            for (var l = -row_size; l <= row_size; l++) {
+                                R.push(img_data.data[((i + l) * width + j + k) * 4]);
+                                G.push(img_data.data[((i + l) * width + j + k) * 4 + 1]);
+                                B.push(img_data.data[((i + l) * width + j + k) * 4 + 2]);
+                                S.push(img_data.data[((i + l) * width + j + k) * 4 + 3]);
+                            }
+                        }
+
+                        R.sort();
+                        G.sort();
+                        B.sort();
+                        S.sort();
+
+                        let sum_R = 0;
+                        let sum_G = 0;
+                        let sum_B = 0;
+                        let sum_S = 0;
+
+                        for (let el = 0; el < R.length; el++) {
+                            sum_R += R[el];
+                            sum_G += G[el];
+                            sum_B += B[el];
+                            sum_S += S[el];
+                        }
+
+
+                        img3_data.data[((i + l) * width + j + k) * 4] = Math.round(sum_R / 9);
+                        img3_data.data[((i + l) * width + j + k) * 4 + 1] = Math.round(sum_G / 9);
+                        img3_data.data[((i + l) * width + j + k) * 4 + 2] = Math.round(sum_B / 9);
+                        img3_data.data[((i + l) * width + j + k) * 4 + 3] = Math.round(sum_S / 9);
+
+                    }
+                }
+
+                ctx3.putImageData(img3_data, 0, 0, 0, 0, width, height);
+            }
+
+            function medianFilter() {
+                let img_data = ctx.getImageData(0, 0, width, height);
+                let img2_data = ctx.createImageData(width, height);
+
+                let row_size = 1;
+                let col_size = 1;
+
+                for (let i = 0; i < height; i++) {
+                    for (let j = 0; j < width; j++) {
+                        const R = [];
+                        const G = [];
+                        const B = [];
+                        const S = [];
+
+                        for (var k = -col_size; k <= col_size; k++) {
+                            for (var l = -row_size; l <= row_size; l++) {
+                                R.push(img_data.data[((i + l) * width + j + k) * 4]);
+                                G.push(img_data.data[((i + l) * width + j + k) * 4 + 1]);
+                                B.push(img_data.data[((i + l) * width + j + k) * 4 + 2]);
+                                S.push(img_data.data[((i + l) * width + j + k) * 4 + 3]);
+                            }
+                        }
+
+                        R.sort();
+                        G.sort();
+                        B.sort();
+                        S.sort();
+
+                        let median = Math.floor(R.length / 2);
+
+                        img2_data.data[((i + l) * width + j + k) * 4] = R[median];
+                        img2_data.data[((i + l) * width + j + k) * 4 + 1] = G[median];
+                        img2_data.data[((i + l) * width + j + k) * 4 + 2] = B[median];
+                        img2_data.data[((i + l) * width + j + k) * 4 + 3] = S[median];
+                    }
+                }
+
+                ctx2.putImageData(img2_data, 0, 0, 0, 0, width, height);
+            }
+
+
+            medianFilter();
+            averageFilter();
+            sobelFilter();
+            gaussFilter();
+
+        };
+    </script>
+</body>
+
+</html>
